@@ -52,7 +52,10 @@ void run_function_50ms(void)
 
 void run_function_100ms(void)
 {
-
+     light_process();
+    ventilate_light_process();
+    mqtt_process();
+    led_show();
 }
 
 void run_function_500ms(void)
@@ -62,10 +65,4 @@ void run_function_500ms(void)
 
 void run_function_10ms(void){}
 void run_function_20ms(void){}
-void run_function_1000ms(void){
-
-    light_process();
-    ventilate_light_process();
-    mqtt_process();
-    led_show();
-}
+void run_function_1000ms(void){}

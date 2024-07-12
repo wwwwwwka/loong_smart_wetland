@@ -3,7 +3,7 @@
 #include "ls1x_string.h"
 #include "ls1x_printf.h"
 #include "ls1x_latimer.h"
-
+#include "cJSON.h"
 #include "queue.h"
 
 uint8_t Read_Buffer[DATA_LEN];//设置接收缓冲数组
@@ -27,7 +27,7 @@ char* esp8266_check_cmd(Circular_queue_t *circular_queue,char *str)//
             memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
             Queue_Read(circular_queue, Read_Buffer,Read_length);//读取队列缓冲区的值到接收缓冲区
             Read_Buffer[Read_length]='\0';//字符串接收结束符
-            printf("%s\r\n", Read_Buffer);// 打印正确
+            //printf("%s\r\n", Read_Buffer);// 打印正确
         }
     }
 
@@ -127,15 +127,24 @@ void esp8266_send_data(char *cmd)
 
 void esp8266_send_isno(void)
 {
-    if(pstrstr((const char*)Read_Buffer, (const char*)"+MQTTSUBRECV"))
+    
+    if(esp8266_check_cmd(&Circular_queue_send,"+MQTTSUBRECV"))
     {
-        Queue_Wirte(&Circular_queue_recv, Read_Buffer,Read_length);    
-        //printf("the data from recv:%s\n",&Circular_queue_recv.data);
+        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
+        printf("the data from recv");
     }
     memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
 }
 
-
+void esp8266_send_isno_2(void)
+{
+    if(pstrstr((const char*)Read_Buffer,"+MQTTSUBRECV"))
+    {
+        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
+        printf("the data from recv");
+    }
+    memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
+}
 
 
 

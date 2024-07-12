@@ -18,6 +18,7 @@ uint8_t* Json_recive_data;
 uint8_t* Json_recive_data_lenth;
 
 uint8_t* mqtt_data;
+uint16_t tim=0;
 
 json_backage_t json_backage;
 
@@ -37,18 +38,23 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
         len_te=strlen(temp);
         if(i != 3)
         {
-            temp[len_te]=',';
-            temp[len_te+1]='\0';
+            temp[len_te]='\\';
+            temp[len_te+1]=',';
+            temp[len_te+2]='\0';
         }
         
-        us_tem[i][0] = '\"';
+        us_tem[i][0] = '\\';
+        us_tem[i][1] = '\"';
+
         for(int j=0;j<len_us;j++)
         {
-          us_tem[i][j+1] = json_send_backage_to->key[i][j];
+          us_tem[i][j+2] = json_send_backage_to->key[i][j];
         }
-        us_tem[i][len_us+1]='\"';
-        us_tem[i][len_us+2]=':';
-        us_tem[i][len_us+3]='\0';
+
+        us_tem[i][len_us+2]='\\';
+        us_tem[i][len_us+3]='\"';
+        us_tem[i][len_us+4]=':';
+        us_tem[i][len_us+5]='\0';
         str_tem[i]=strcat(us_tem[i],temp);
     }
     mqtt_data++;
@@ -61,40 +67,57 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
     *mqtt_len=mqtt_lenth+1;
 }
 
-void esp8266_send_json(uint8_t send_len,char *ack, uint16_t waittime)
+void esp8266_send_json(void)
 {
-    char res = 0;
-    char* send_len_str;
-    itoa(send_len_str,send_len);
     //UART0_RX_STA = 0;
-    //esp8266_send_cmd("AT+MQTTPUB=0,\"topic/esp8266\",%s,0,0","OK",300);
-    myprintf2(0,"AT+MQTTPUBRAW=0,\"/k1dl3eJ2RBB/1c102f/user/update\",%s,0,0\n", send_len_str);	//发送命令
-    while(1)	//等待倒计时
+    uint16_t tim=0;
+    uint16_t waittime=20;
+    
+    myprintf2(0,"AT+MQTTPUB=0,\"/k1dl3eJ2RBB/1c102f/user/update\",\"%s\",0,0\n", mqtt_data);	//发送命令
+    while(--waittime)	//等待倒计时
     {
         delay_ms(50);
         if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
-        {      
-            esp8266_send_isno();
+        {
+            esp8266_send_isno_2();
             json_to_callback();
-            // if(pstrstr((const char*), (const char*)"+MQTTSUBRECV")) 
-            //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_send));    
-            break;
+            break;//得到有效数据
         }
     }
+
+
+    // char res = 0;
+    // char* send_len_str;
+    // itoa(send_len_str,send_len);
+    // //UART0_RX_STA = 0;
+    // //esp8266_send_cmd("AT+MQTTPUB=0,\"topic/esp8266\",%s,0,0","OK",300);
+    // myprintf2(0,"AT+MQTTPUBRAW=0,\"/k1dl3eJ2RBB/1c102f/user/update\",%s,0,0\n", send_len_str);	//发送命令
+    // while(1)	//等待倒计时
+    // {
+    //     delay_ms(50);
+    //     if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
+    //     {      
+    //         esp8266_send_isno();
+    //         json_to_callback();
+    //         // if(pstrstr((const char*), (const char*)"+MQTTSUBRECV")) 
+    //         //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_send));    
+    //         break;
+    //     }
+    // }
         
-    esp8266_send_data(mqtt_data);
-    while(1)
-    {
-        delay_ms(50);
-        if(esp8266_check_cmd(&Circular_queue_send,"+MQTTPUB:OK")) 
-        {      
-            esp8266_send_isno();
-            json_to_callback();
-            // if(pstrstr((const char*)&Circular_queue_send.data, (const char*)"+MQTTSUBRECV")) 
-            //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_recv));
-            break;
-        }
-    }
+    // esp8266_send_data(mqtt_data);
+    // while(1)
+    // {
+    //     delay_ms(50);
+    //     if(esp8266_check_cmd(&Circular_queue_send,"+MQTTPUB:OK")) 
+    //     {      
+    //         esp8266_send_isno();
+    //         json_to_callback();
+    //         // if(pstrstr((const char*)&Circular_queue_send.data, (const char*)"+MQTTSUBRECV")) 
+    //         //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_recv));
+    //         break;
+    //     }
+    // }
 }
 
 void json_to_callback(void)
@@ -119,6 +142,7 @@ void json_to_callback(void)
                 printf("%s\r\n", Json_Read_Buffer);// 打印正确
                 printf("%d\r\n", Json_Read_length);// 打印正确Json_Read_length
             }
+        
             for(i=0;i<Json_Read_length;i++)
             {  
             if(Json_Read_Buffer[i] == ',')
@@ -132,59 +156,73 @@ void json_to_callback(void)
             {
                 Json_recive_data_lenth[i-Json_Comma_Flag[1]-1] = Json_Read_Buffer[i];
             }
-            //printf("%s\n",Json_recive_data_lenth);
+            printf("%s\n",Json_recive_data_lenth);
 
             for(i=Json_Comma_Flag[2]+1;i<Json_Read_length;i++)
             {
                 Json_recive_data[i-Json_Comma_Flag[2]-1] = Json_Read_Buffer[i];
             }
-            //printf("%s\n",Json_recive_data);
-            
+            printf("%s\n",Json_recive_data);
+
+            // Json_recive_data[0]=Json_Read_Buffer[51]-'0';
+            // Json_recive_data[1]=Json_Read_Buffer[52]-'0';
+            // Json_recive_data[2]=Json_Read_Buffer[53]-'0';
+            // Json_recive_data[3]=Json_Read_Buffer[54]-'0';
+
+            Json_recive_data[0]=Json_recive_data[0]-'0';
+            Json_recive_data[1]=Json_recive_data[1]-'0';
+            Json_recive_data[2]=Json_recive_data[2]-'0';
+            Json_recive_data[3]=Json_recive_data[3]-'0';
+
             printf("%d\n",Json_recive_data[0]);
             printf("%d\n",Json_recive_data[1]);
             printf("%d\n",Json_recive_data[2]);
             printf("%d\n",Json_recive_data[3]);
 
-            if(Json_recive_data[0]-'0'==1)
+            if(Json_recive_data[0]==1)
             {
                 gpio_write_pin(GPIO_PIN_29,1);
                 gpio_write_pin(GPIO_PIN_28,0);
-            }else if(Json_recive_data[0]-'0'==0)
+            }else if(Json_recive_data[0]==0)
             {  
                 gpio_write_pin(GPIO_PIN_29,0);
                 gpio_write_pin(GPIO_PIN_28,0);
             }
 
-            if(Json_recive_data[1]-'0'==1)
+            if(Json_recive_data[1]==1)
             {
                 gpio_write_pin(GPIO_PIN_27,1);
                 gpio_write_pin(GPIO_PIN_26,0);
-            }else if(Json_recive_data[1]-'0'==0)
+            }else if(Json_recive_data[1]==0)
             {
                 gpio_write_pin(GPIO_PIN_27,0);
                 gpio_write_pin(GPIO_PIN_26,0);
             }
             
-            if(Json_recive_data[2]-'0'==1)
+            if(Json_recive_data[2]==1)
             {
                 gpio_write_pin(GPIO_PIN_23,1);
                 gpio_write_pin(GPIO_PIN_22,0);
-            }else if(Json_recive_data[2]-'0'==0)
+            }else if(Json_recive_data[2]==0)
             {
                 gpio_write_pin(GPIO_PIN_23,0);
                 gpio_write_pin(GPIO_PIN_22,0);
             }
 
-            if(Json_recive_data[3]-'0'==1)
+            if(Json_recive_data[3]==1)
             {
                 gpio_write_pin(GPIO_PIN_25,1);
                 gpio_write_pin(GPIO_PIN_24,0);
-            }else if(Json_recive_data[3]-'0'==0)
+            }else if(Json_recive_data[3]==0)
             {
                 gpio_write_pin(GPIO_PIN_25,0);
                 gpio_write_pin(GPIO_PIN_24,0);
             }
-            
+
+            Json_recive_data[0]=0;
+            Json_recive_data[1]=0;
+            Json_recive_data[2]=0;
+            Json_recive_data[3]=0;
     }
 }
 

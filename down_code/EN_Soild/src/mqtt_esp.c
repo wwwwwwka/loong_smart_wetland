@@ -13,8 +13,12 @@
 #include "pid.h"
 #include "esp8266.h"
 #include "cJSON.h"
+#include "temperature_contrl.h"
+#include "soil_hum.h"
 
 mqtt_esp_type_t mqtt_esp_type;
+
+uint8_t esp_count = 0;
 
 void mqtt_process_init(void) {Mqtt_System_Init(&mqtt_esp_type);}
 
@@ -46,7 +50,18 @@ void Mqtt_Data_Feedback(mqtt_esp_type_t* mqtt_esp_type_back)
     mqtt_esp_type_back->json_send_backage.value[2] = 0;
     mqtt_esp_type_back->json_send_backage.value[3] = 0;
     
-    json_to_send(&mqtt_esp_type_back->json_send_backage,&send_len);
-    esp8266_send_json(send_len);
+    if(esp_count == 50)
+    {
+        tempareture_process();
+        Humidity_process();
+        json_to_send(&mqtt_esp_type_back->json_send_backage,&send_len);
+        esp8266_send_json();
+        esp_count=0;
+    }else
+    {
+        esp8266_send_isno();
+        json_to_callback();
+        esp_count++;
+    }
 
 }

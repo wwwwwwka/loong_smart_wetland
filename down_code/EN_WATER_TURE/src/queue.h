@@ -12,7 +12,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define DATA_LEN    300 //队列缓存大小
+#define DATA_LEN    516//队列缓存大小
 
 typedef struct
 {

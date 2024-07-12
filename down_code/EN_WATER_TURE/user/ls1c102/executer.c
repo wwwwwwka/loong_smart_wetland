@@ -9,7 +9,6 @@
 #include "ls1c102_ptimer.h"
 #include "ls1x_printf.h"
 #include "ls1c102_adc.h"
-#include "pid.h"
 #include "led_show.h"
 #include "water_circle.h"
 #include "mqtt_esp.h"
@@ -49,12 +48,16 @@ void run_function_50ms(void)
 
 void run_function_100ms(void)
 {
-      
+    water_circle_process();
+    mqtt_process();
+    led_show();
 }
 
 void run_function_500ms(void)
 {
-
+    // water_circle_process();
+    // mqtt_process();
+    // led_show();
 }
 
 void run_function_10ms(void){}
@@ -62,7 +65,7 @@ void run_function_20ms(void){}
 
 void run_function_1000ms(void)
 {
-    water_circle_process();
-    mqtt_process();
-    led_show();
+    // water_circle_process();
+    // mqtt_process();
+    // led_show();
 }

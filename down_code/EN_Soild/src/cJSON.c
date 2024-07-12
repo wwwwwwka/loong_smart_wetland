@@ -40,18 +40,23 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
         len_te=strlen(temp);
         if(i != 3)
         {
-            temp[len_te]=',';
-            temp[len_te+1]='\0';
+            temp[len_te]='\\';
+            temp[len_te+1]=',';
+            temp[len_te+2]='\0';
         }
         
-        us_tem[i][0] = '\"';
+        us_tem[i][0] = '\\';
+        us_tem[i][1] = '\"';
+
         for(int j=0;j<len_us;j++)
         {
-          us_tem[i][j+1] = json_send_backage_to->key[i][j];
+          us_tem[i][j+2] = json_send_backage_to->key[i][j];
         }
-        us_tem[i][len_us+1]='\"';
-        us_tem[i][len_us+2]=':';
-        us_tem[i][len_us+3]='\0';
+
+        us_tem[i][len_us+2]='\\';
+        us_tem[i][len_us+3]='\"';
+        us_tem[i][len_us+4]=':';
+        us_tem[i][len_us+5]='\0';
         str_tem[i]=strcat(us_tem[i],temp);
     }
     mqtt_data++;
@@ -64,38 +69,21 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
     *mqtt_len=mqtt_lenth+1;
 }
 
-void esp8266_send_json(uint8_t send_len)
+void esp8266_send_json(void)
 {
-    char res = 0;
-    char* send_len_str;
-
-    uint8_t waittime=20;
-
-    itoa(send_len_str,send_len);
-
-    //esp8266_send_cmd("AT+MQTTPUB=0,\"topic/esp8266\",%s,0,0","OK",300);
-    myprintf2(0,"AT+MQTTPUBRAW=0,\"/k1dl3eJ2RBB/1c102s/user/update\",%s,0,0\n", send_len_str);	//发送命令
+    //UART0_RX_STA = 0;
+    uint16_t tim=0;
+    uint16_t waittime=20;
+    
+    myprintf2(0,"AT+MQTTPUB=0,\"/k1dl3eJ2RBB/1c102s/user/update\",\"%s\",0,0\n", mqtt_data);	//发送命令
     while(--waittime)	//等待倒计时
     {
-        delay_ms(100);
+        delay_ms(50);
         if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
-        {      
-            // esp8266_send_isno();
-            // json_to_callback();    
-            break;
-        }
-    }
-
-    waittime=20;
-    esp8266_send_data(mqtt_data);
-    while(--waittime)
-    {
-        delay_ms(100);
-        if(esp8266_check_cmd(&Circular_queue_send,"+MQTTPUB:OK")) 
-        {      
-            // esp8266_send_isno();
-            // json_to_callback();
-            break;
+        {
+            esp8266_send_isno_2();
+            json_to_callback();
+            break;//得到有效数据
         }
     }
 }
@@ -119,8 +107,8 @@ void json_to_callback(void)
                 memset(Json_Read_Buffer, 0, JSON_DATA_LEN);//填充接收缓冲区为0
                 Queue_Read(&Circular_queue_recv,Json_Read_Buffer,Json_Read_length);//读取队列缓冲区的值到接收缓冲区
                 Json_Read_Buffer[Json_Read_length]='\0';//字符串接收结束符
-                //printf("%s\r\n", Json_Read_Buffer);// 打印正确
-                //printf("%d\r\n", Json_Read_length);// 打印正确Json_Read_length
+                // printf("%s\r\n", Json_Read_Buffer);// 打印正确
+                // printf("%d\r\n", Json_Read_length);// 打印正确Json_Read_length
             }
 
             for(i=0;i<Json_Read_length;i++)
@@ -136,81 +124,85 @@ void json_to_callback(void)
             {
                 Json_recive_data_lenth[i-Json_Comma_Flag[1]-1] = Json_Read_Buffer[i];
             }
-            //printf("%s\n",Json_recive_data_lenth);
+            printf("%s\n",Json_recive_data_lenth);
 
             for(i=Json_Comma_Flag[2]+1;i<Json_Read_length;i++)
             {
                 Json_recive_data[i-Json_Comma_Flag[2]-1] = Json_Read_Buffer[i];
             }
-            //printf("%s\n",Json_recive_data);
+            printf("%s\n",Json_recive_data);
 
             if (Json_recive_data[4]-'0'==1)
             {
-                contrl_package[0]=0x02;
-                contrl_package[1]=0x06;
-                contrl_package[2]=0x00;
-                contrl_package[3]=0x0F;
-                contrl_package[4] = 0xFF;
-                contrl_package[5] = 0xFF;
-                getModbusCRC16(contrl_package,6);
-                // contrl_package[6] = *(contrl_package + 6);
-                // contrl_package[7] = *(contrl_package + 7);
+                gpio_write_pin(GPIO_PIN_23,1);
+                gpio_write_pin(GPIO_PIN_22,0);
+                // delay_ms(100);
+                // contrl_package[0]=0x02;
+                // contrl_package[1]=0x06;
+                // contrl_package[2]=0x00;
+                // contrl_package[3]=0x0F;
+                // contrl_package[4] = 0xFF;
+                // contrl_package[5] = 0xFF;
+                // getModbusCRC16(contrl_package,6);
+                // // contrl_package[6] = *(contrl_package + 6);
+                // // contrl_package[7] = *(contrl_package + 7);
 
-                for(int i=0;i<8;i++)
-                {
-                    UART_SendData(UART_485,contrl_package[i]);
-                }
+                // for(int i=0;i<8;i++)
+                // {
+                //     UART_SendData(UART_485,contrl_package[i]);
+                // }
 
-                delay_ms(50);
+                // delay_ms(100);
 
-                uint16_t temp_value=1000;
+                // uint16_t temp_value=1000;
                 
-                contrl_package[0]=0x02;
-                contrl_package[1]=0x06;
-                contrl_package[2]=0x00;
-                contrl_package[3]=0x00;
-                contrl_package[4] = temp_value>>8;
-                contrl_package[5] = temp_value;
-	            getModbusCRC16(contrl_package,6);
+                // contrl_package[0]=0x02;
+                // contrl_package[1]=0x06;
+                // contrl_package[2]=0x00;
+                // contrl_package[3]=0x03;
+                // contrl_package[4] = temp_value>>8;
+                // contrl_package[5] = temp_value;
+	            // getModbusCRC16(contrl_package,6);
     
-                for(int i=0;i<8;i++)
-                {
-                    UART_SendData(UART_485,contrl_package[i]);
-                }
+                // for(int i=0;i<8;i++)
+                // {
+                //     UART_SendData(UART_485,contrl_package[i]);
+                // }
 
             }else if(Json_recive_data[4]-'0'==0)
             {
-                contrl_package[0]=0x02;
-                contrl_package[1]=0x06;
-                contrl_package[2]=0x00;
-                contrl_package[3]=0x0F;
-                contrl_package[4] = 0xFF;
-                contrl_package[5] = 0xFF;
-                getModbusCRC16(contrl_package,6);
-                // contrl_package[6] = *(contrl_package + 6);
-                // contrl_package[7] = *(contrl_package + 7);
+                gpio_write_pin(GPIO_PIN_23,0);
+                gpio_write_pin(GPIO_PIN_22,0);
+                // delay_ms(100);
+                // contrl_package[0]=0x02;
+                // contrl_package[1]=0x06;
+                // contrl_package[2]=0x00;
+                // contrl_package[3]=0x0F;
+                // contrl_package[4] = 0x00;
+                // contrl_package[5] = 0x00;
+                // getModbusCRC16(contrl_package,6);
 
-                for(int i=0;i<8;i++)
-                {
-                    UART_SendData(UART_485,contrl_package[i]);
-                }
+                // for(int i=0;i<8;i++)
+                // {
+                //     UART_SendData(UART_485,contrl_package[i]);
+                // }
 
-                delay_ms(50);
+                // delay_ms(100);
 
-                uint16_t temp_value=0;
+                // uint16_t temp_value=0;
                 
-                contrl_package[0]=0x02;
-                contrl_package[1]=0x06;
-                contrl_package[2]=0x00;
-                contrl_package[3]=0x00;
-                contrl_package[4] = temp_value>>8;
-                contrl_package[5] = temp_value;
-	            getModbusCRC16(contrl_package,6);
+                // contrl_package[0]=0x02;
+                // contrl_package[1]=0x06;
+                // contrl_package[2]=0x00;
+                // contrl_package[3]=0x03;
+                // contrl_package[4] = 0x00;
+                // contrl_package[5] = 0x00;
+	            // getModbusCRC16(contrl_package,6);
     
-                for(int i=0;i<8;i++)
-                {
-                    UART_SendData(UART_485,contrl_package[i]);
-                }
+                // for(int i=0;i<8;i++)
+                // {
+                //     UART_SendData(UART_485,contrl_package[i]);
+                // }
             }
     }
 }

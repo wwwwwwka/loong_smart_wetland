@@ -37,18 +37,23 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
         len_te=strlen(temp);
         if(i != 3)
         {
-            temp[len_te]=',';
-            temp[len_te+1]='\0';
+            temp[len_te]='\\';
+            temp[len_te+1]=',';
+            temp[len_te+2]='\0';
         }
         
-        us_tem[i][0] = '\"';
+        us_tem[i][0] = '\\';
+        us_tem[i][1] = '\"';
+
         for(int j=0;j<len_us;j++)
         {
-          us_tem[i][j+1] = json_send_backage_to->key[i][j];
+          us_tem[i][j+2] = json_send_backage_to->key[i][j];
         }
-        us_tem[i][len_us+1]='\"';
-        us_tem[i][len_us+2]=':';
-        us_tem[i][len_us+3]='\0';
+
+        us_tem[i][len_us+2]='\\';
+        us_tem[i][len_us+3]='\"';
+        us_tem[i][len_us+4]=':';
+        us_tem[i][len_us+5]='\0';
         str_tem[i]=strcat(us_tem[i],temp);
     }
     mqtt_data++;
@@ -61,38 +66,21 @@ void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len)
     *mqtt_len=mqtt_lenth+1;
 }
 
-void esp8266_send_json(uint8_t send_len,char *ack, uint16_t waittime)
+void esp8266_send_json(void)
 {
-    char res = 0;
-    char* send_len_str;
-    itoa(send_len_str,send_len);
     //UART0_RX_STA = 0;
-    //esp8266_send_cmd("AT+MQTTPUB=0,\"topic/esp8266\",%s,0,0","OK",300);
-    myprintf2(0,"AT+MQTTPUBRAW=0,\"/k1dl3eJ2RBB/1c102t/user/update\",%s,0,0\n", send_len_str);	//发送命令
-    while(1)	//等待倒计时
+    uint16_t tim=0;
+    uint16_t waittime=20;
+    
+    myprintf2(0,"AT+MQTTPUB=0,\"/k1dl3eJ2RBB/1c102t/user/update\",\"%s\",0,0\n", mqtt_data);	//发送命令
+    while(--waittime)	//等待倒计时
     {
         delay_ms(50);
         if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
-        {      
-            esp8266_send_isno();
+        {
+            esp8266_send_isno_2();
             json_to_callback();
-            // if(pstrstr((const char*), (const char*)"+MQTTSUBRECV")) 
-            //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_send));    
-            break;
-        }
-    }
-        
-    esp8266_send_data(mqtt_data);
-    while(1)
-    {
-        delay_ms(50);
-        if(esp8266_check_cmd(&Circular_queue_send,"+MQTTPUB:OK")) 
-        {      
-            esp8266_send_isno();
-            json_to_callback();
-            // if(pstrstr((const char*)&Circular_queue_send.data, (const char*)"+MQTTSUBRECV")) 
-            //    Queue_Wirte(&Circular_queue_recv,Circular_queue_send.data,Queue_HadUse(&Circular_queue_recv));
-            break;
+            break;//得到有效数据
         }
     }
 }

@@ -14,6 +14,7 @@ char esp8266_send_cmd(Circular_queue_t *circular_queue,char *cmd,char *ack,uint1
 void esp8266_init(void);// ESP8266 模块进入透传模式
 void esp8266_send_data(char *cmd);// 向 ESP8266 发送数据
 void esp8266_send_isno(void);
+void esp8266_send_isno_2(void);
 
 #ifdef __cplusplus
 }

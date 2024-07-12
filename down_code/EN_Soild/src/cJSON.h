@@ -18,7 +18,7 @@ typedef struct
 }json_send_backage_t;
 
 void json_to_send(json_send_backage_t* json_send_backage_to,uint8_t* mqtt_len);
-void esp8266_send_json(uint8_t send_len);
+void esp8266_send_json(void);
 void json_to_callback(void);
 const json_backage_t* json_backage_value_get(void);
 

@@ -50,7 +50,10 @@ void run_function_50ms(void)
 
 void run_function_100ms(void)
 {
-
+    mqtt_process();
+    //tempareture_process();
+    //Humidity_process();
+    led_show();
 }
 
 void run_function_500ms(void)
@@ -60,9 +63,4 @@ void run_function_500ms(void)
 
 void run_function_10ms(void){}
 void run_function_20ms(void){}
-void run_function_1000ms(void){
-    mqtt_process();
-    tempareture_process();
-    Humidity_process();
-    led_show();
-}
+void run_function_1000ms(void){}

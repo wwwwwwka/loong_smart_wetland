@@ -10,7 +10,6 @@
 #include "ls1x_uart.h"
 #include "Config.h"
 #include "queue.h"
-#include "Modbus_rtu.h"
 #include "cJSON.h"
 #include "ls1x_string.h"
 #include "mqtt_esp.h"
@@ -411,7 +410,7 @@ void intc_handler(void)
     {
         
         receive_data_uart1=UART1_RxData;
-        printf("%d\n",receive_data_uart1);
+        //printf("%d\n",receive_data_uart1);
         INT_CLR = UART1_INT_CLR;
         
     }

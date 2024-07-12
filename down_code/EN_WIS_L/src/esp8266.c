@@ -127,7 +127,7 @@ void esp8266_send_data(char *cmd)
 
 void esp8266_send_isno(void)
 {
-    if(pstrstr((const char*)Read_Buffer, (const char*)"+MQTTSUBRECV"))
+    if(esp8266_check_cmd(&Circular_queue_send,"+MQTTSUBRECV"))
     {
         Queue_Wirte(&Circular_queue_recv, Read_Buffer,Read_length);    
         //printf("the data from recv:%s\n",&Circular_queue_recv.data);
@@ -135,6 +135,15 @@ void esp8266_send_isno(void)
     memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
 }
 
+void esp8266_send_isno_2(void)
+{
+    if(pstrstr((const char*)Read_Buffer,"+MQTTSUBRECV"))
+    {
+        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
+        //printf("the data from recv");
+    }
+    memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
+}
 
 
 

@@ -404,7 +404,6 @@ void Uart0_init(uint32_t baud)
 
     INT_POL |= 0x08;
     INT_EN |= 0x08;
-
     UART_ITConfig(UART0,UART_IT_IRE,ENABLE);
 
 }
@@ -423,7 +422,6 @@ void Uart1_init(uint32_t baud)
 
     // INT_POL |= 0x04;
     // INT_EN |= 0x04;
-
     UART_ITConfig(UART1,UART_IT_IRE,!ENABLE);
 }
 

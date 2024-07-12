@@ -18,8 +18,8 @@
 #include "light_adc.h"
 
 mqtt_esp_type_t mqtt_esp_type;
-
 uint8_t esp_init_flag=0;
+uint8_t esp_count=0;
 
 void mqtt_process_init(void) {Mqtt_System_Init(&mqtt_esp_type);}
 
@@ -52,10 +52,17 @@ void Mqtt_Feedback(mqtt_esp_type_t* mqtt_esp_type_back)
     mqtt_esp_type_back->json_send_backage.value[2] = mqtt_esp_type_back->ventilate_type->smoke_adc_value;
     mqtt_esp_type_back->json_send_backage.value[3] = 0;
     
-    json_to_send(&mqtt_esp_type_back->json_send_backage,&send_len);
-    esp8266_send_json(send_len,"OK",50);
-
-    //json_to_callback();
+    if(esp_count == 50)
+    {
+        json_to_send(&mqtt_esp_type_back->json_send_backage,&send_len);
+        esp8266_send_json();
+        esp_count=0;
+    }else
+    {
+        esp8266_send_isno();
+        json_to_callback();
+        esp_count++;
+    }
     
 }
 
