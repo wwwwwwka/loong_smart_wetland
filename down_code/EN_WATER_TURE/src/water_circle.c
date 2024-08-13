@@ -75,7 +75,7 @@ void Water_Circle_Get(water_circle_type_t* water_circle_type_get)  //函数用�
       water_circle_type_get->PH_value_get.GET_AD_VALUE[i]= 4096-Adc_Measure(ADC_CHANNEL_I4);
       water_circle_type_get->depth_value_get.GET_AD_VALUE[i]= Adc_Measure(ADC_CHANNEL_I0);
       water_circle_type_get->turbidity_value_get.GET_AD_VALUE[i]=Adc_Measure(ADC_CHANNEL_I7);
-      water_circle_type_get->water_temp_value_get.GET_AD_VALUE[i]=Adc_Measure(ADC_CHANNEL_I7);
+      water_circle_type_get->water_temp_value_get.GET_AD_VALUE[i]=Adc_Measure(ADC_CHANNEL_I6);
       
    }
       
@@ -99,7 +99,7 @@ void Water_Circle_value_feedback(water_circle_type_t* water_circle_type_back)
    water_circle_type_back->depth_value =  water_circle_type_back->depth_value_get.GET_AD_MEAN;
    water_circle_type_back->turbidity_value =  water_circle_type_back->turbidity_value_get.GET_AD_MEAN;
    water_circle_type_back->water_temp_value = water_circle_type_back->water_temp_value_get.GET_AD_MEAN;
-
+   //printf("%d\n",water_circle_type_back->water_temp_value);
 }
 
 void Water_Circle_Contrl(water_circle_type_t* water_circle_type_contrl)  

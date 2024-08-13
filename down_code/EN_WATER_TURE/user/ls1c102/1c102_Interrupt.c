@@ -417,14 +417,16 @@ void intc_handler(void)
 
     if (IntReg & UART0_INT_OUT) //Uart0
     {
-        if(UART0_IIR&0x04)
-        {
-            while(UART0_LSR&0x1)
-            {
-                receive_data_uart0=UART_ReceiveData(UART0);
-                Queue_Wirte(&Circular_queue_send, (uint8_t *)&receive_data_uart0, 1);//向队列中写入数据
-            }
-        }
+        // if(UART0_IIR&0x04)
+        // {
+        //     while(UART0_LSR&0x1)
+        //     {
+        //         receive_data_uart0=UART_ReceiveData(UART0);
+        //         Queue_Wirte(&Circular_queue_send, (uint8_t *)&receive_data_uart0, 1);//向队列中写入数据
+        //     }
+        // }
+        receive_data_uart0=UART_ReceiveData(UART0);
+        Queue_Wirte(&Circular_queue_send, (uint8_t *)&receive_data_uart0, 1);//向队列中写入数据
         INT_CLR = UART0_INT_CLR;
     }
     INT_CLR = 0xff;

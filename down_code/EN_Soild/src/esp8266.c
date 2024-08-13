@@ -90,7 +90,7 @@ void esp8266_init(void)
 
     //让模块连接上自己的手机热点
     printf("AT+CWJAP=yx-iphone,12345678\r\n");
-    while(esp8266_send_cmd(&Circular_queue_send,"AT+CWJAP=\"Tenda_BC79E0\",\"stm32f103c8t6\"","OK", 300));
+    while(esp8266_send_cmd(&Circular_queue_send,"AT+CWJAP=\"nova\",\"12345678\"","OK", 300));
     delay_ms(100);
     
     // =0：单路连接模式；=1：多路连接模式
@@ -127,13 +127,22 @@ void esp8266_send_data(char *cmd)
 
 void esp8266_send_isno(void)
 {
-    
-    if(esp8266_check_cmd(&Circular_queue_send,"+MQTTSUBRECV"))
+    if(Queue_isEmpty(&Circular_queue_send)==0)
     {
-        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
-        printf("the data from recv");
+        //printf("13895039116\n");
+        delay_ms(50);
+        // if(pstrstr((const char*)&Circular_queue_send.data,"+MQTTSUBRECV"))
+        // {
+            Read_length=Queue_HadUse(&Circular_queue_send);
+            {
+                memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
+                Queue_Read(&Circular_queue_send,Read_Buffer,Read_length);
+                Read_Buffer[Read_length]='\0';
+                //printf("%s\r\n", Read_Buffer);// 打印正确
+            }
+        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));
+        //}
     }
-    memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
 }
 
 void esp8266_send_isno_2(void)

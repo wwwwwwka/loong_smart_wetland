@@ -33,9 +33,6 @@ void Ventilate_System_Init(ventilate_type_t* ventilate_type_init)
         ventilate_type_init->smoke_adc_get.GET_AD_VALUE[i]=0;
     }
 
-    Adc_open(ADC_CHANNEL_I0);//打开通道4
-    Adc_open(ADC_CHANNEL_I1);//打开通道5
-
 }
 
 void Ventilate_Get(ventilate_type_t* ventilate_type_get)
@@ -98,6 +95,7 @@ void Ventilate_Value_Feedback(ventilate_type_t* ventilate_type_back)
     //printf("%d,%d\n",ventilate_type_back->co2_adc_value,ventilate_type_back->smoke_adc_value);
 
 }
+
 void Ventilate_Contrl(ventilate_type_t* ventilate_type_contrl)
 {
 

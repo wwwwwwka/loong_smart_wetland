@@ -43,7 +43,6 @@ void executer_choose_run(void)
 
 void run_function_50ms(void)
 {
-    
 }
 
 void run_function_100ms(void)
@@ -55,9 +54,7 @@ void run_function_100ms(void)
 
 void run_function_500ms(void)
 {
-    // water_circle_process();
-    // mqtt_process();
-    // led_show();
+    
 }
 
 void run_function_10ms(void){}

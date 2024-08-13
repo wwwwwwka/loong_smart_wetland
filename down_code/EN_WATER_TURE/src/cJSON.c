@@ -79,8 +79,6 @@ void esp8266_send_json(void)
         delay_ms(50);
         if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
         {
-            esp8266_send_isno_2();
-            json_to_callback();
             break;//得到有效数据
         }
     }
@@ -139,8 +137,8 @@ void json_to_callback(void)
                 memset(Json_Read_Buffer, 0, JSON_DATA_LEN);//填充接收缓冲区为0
                 Queue_Read(&Circular_queue_recv,Json_Read_Buffer,Json_Read_length);//读取队列缓冲区的值到接收缓冲区
                 Json_Read_Buffer[Json_Read_length]='\0';//字符串接收结束符
-                printf("%s\r\n", Json_Read_Buffer);// 打印正确
-                printf("%d\r\n", Json_Read_length);// 打印正确Json_Read_length
+                // printf("%s\r\n", Json_Read_Buffer);// 打印正确
+                // printf("%d\r\n", Json_Read_length);// 打印正确Json_Read_length
             }
         
             for(i=0;i<Json_Read_length;i++)
@@ -156,13 +154,13 @@ void json_to_callback(void)
             {
                 Json_recive_data_lenth[i-Json_Comma_Flag[1]-1] = Json_Read_Buffer[i];
             }
-            printf("%s\n",Json_recive_data_lenth);
+            //printf("%s\n",Json_recive_data_lenth);
 
             for(i=Json_Comma_Flag[2]+1;i<Json_Read_length;i++)
             {
                 Json_recive_data[i-Json_Comma_Flag[2]-1] = Json_Read_Buffer[i];
             }
-            printf("%s\n",Json_recive_data);
+            //printf("%s\n",Json_recive_data);
 
             // Json_recive_data[0]=Json_Read_Buffer[51]-'0';
             // Json_recive_data[1]=Json_Read_Buffer[52]-'0';
@@ -174,10 +172,10 @@ void json_to_callback(void)
             Json_recive_data[2]=Json_recive_data[2]-'0';
             Json_recive_data[3]=Json_recive_data[3]-'0';
 
-            printf("%d\n",Json_recive_data[0]);
-            printf("%d\n",Json_recive_data[1]);
-            printf("%d\n",Json_recive_data[2]);
-            printf("%d\n",Json_recive_data[3]);
+            // printf("%d\n",Json_recive_data[0]);
+            // printf("%d\n",Json_recive_data[1]);
+            // printf("%d\n",Json_recive_data[2]);
+            // printf("%d\n",Json_recive_data[3]);
 
             if(Json_recive_data[0]==1)
             {

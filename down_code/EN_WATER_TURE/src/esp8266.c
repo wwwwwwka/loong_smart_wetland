@@ -27,7 +27,7 @@ char* esp8266_check_cmd(Circular_queue_t *circular_queue,char *str)//
             memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
             Queue_Read(circular_queue, Read_Buffer,Read_length);//读取队列缓冲区的值到接收缓冲区
             Read_Buffer[Read_length]='\0';//字符串接收结束符
-            //printf("%s\r\n", Read_Buffer);// 打印正确
+            printf("%s\r\n", Read_Buffer);// 打印正确
         }
     }
 
@@ -90,7 +90,8 @@ void esp8266_init(void)
 
     //让模块连接上自己的手机热点
     printf("AT+CWJAP=Tenda_BC79E0,stm32f103c8t6\r\n");
-    while(esp8266_send_cmd(&Circular_queue_send,"AT+CWJAP=\"Tenda_BC79E0\",\"stm32f103c8t6\"","OK", 300));
+    //while(esp8266_send_cmd(&Circular_queue_send,"AT+CWJAP=\"Tenda_BC79E0\",\"stm32f103c8t6\"","OK", 300));
+    while(esp8266_send_cmd(&Circular_queue_send,"AT+CWJAP=\"nova\",\"12345678\"","OK", 300));
     delay_ms(100);
     
     // =0：单路连接模式；=1：多路连接模式
@@ -125,16 +126,38 @@ void esp8266_send_data(char *cmd)
     myprintf2(0,"%s",cmd);// 发送数据
 }
 
+uint8_t len = 0;
+
 void esp8266_send_isno(void)
 {
-    
-    if(esp8266_check_cmd(&Circular_queue_send,"+MQTTSUBRECV"))
+    if(Queue_isEmpty(&Circular_queue_send)==0)
     {
-        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
-        printf("the data from recv");
+        //printf("13895039116\n");
+        delay_ms(50);
+        // if(pstrstr((const char*)&Circular_queue_send.data,"+MQTTSUBRECV"))
+        // {
+            Read_length=Queue_HadUse(&Circular_queue_send);
+            {
+                memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
+                Queue_Read(&Circular_queue_send,Read_Buffer,Read_length);
+                Read_Buffer[Read_length]='\0';
+                //printf("%s\r\n", Read_Buffer);// 打印正确
+            }
+        Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));
+        //}
     }
-    memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
 }
+
+// void esp8266_send_isno(void)
+// {
+    
+//     if(esp8266_check_cmd(&Circular_queue_send,"+MQTTSUBRECV"))
+//     {
+//         Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
+//         printf("the data from recv");
+//         memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
+//     }
+// }
 
 void esp8266_send_isno_2(void)
 {
@@ -142,6 +165,7 @@ void esp8266_send_isno_2(void)
     {
         Queue_Wirte(&Circular_queue_recv,Read_Buffer,strlen(Read_Buffer));  
         printf("the data from recv");
+        memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
     }
     memset(Read_Buffer, 0, DATA_LEN);//填充接收缓冲区为0
 }

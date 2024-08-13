@@ -24,6 +24,8 @@ extern bool flag_1000ms;
 
 void executer_init(void)
 {
+    gpio_write_pin(GPIO_PIN_23,0);
+    gpio_write_pin(GPIO_PIN_22,0);
     delay_ms(500);
     led_init();
     mqtt_process_init();

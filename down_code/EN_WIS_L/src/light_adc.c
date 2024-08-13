@@ -41,8 +41,9 @@ void Light_System_Init(light_type_t *light_type_init)
    printf("#007P1500T0000!");
 
    Adc_powerOn();//adc电源开启
+   Adc_open(ADC_CHANNEL_I0);//打开通道4
+   Adc_open(ADC_CHANNEL_I1);//打开通道5
    Adc_open(ADC_CHANNEL_I6);//打开通道4
-   Adc_open(ADC_CHANNEL_I7);//打开通道5
 }
 
 void Light_TEMT6000_Get(light_type_t *light_type_get)  //函数用于获取光照传感器的原始数据
@@ -63,7 +64,8 @@ void Light_TEMT6000_Get(light_type_t *light_type_get)  //函数用于获取光�
    for(i = 0;i < GET_AD;i++)
    {
       light_type_get->light_value_left_get.GET_AD_VALUE[i]= Adc_Measure(ADC_CHANNEL_I6);
-      light_type_get->light_value_right_get.GET_AD_VALUE[i]= Adc_Measure(ADC_CHANNEL_I7);
+      light_type_get->light_value_right_get.GET_AD_VALUE[i]= 0;
+      //printf("%d,%d\n",light_type_get->light_value_left_get.GET_AD_VALUE[i],light_type_get->light_value_right_get.GET_AD_VALUE[i]);
    }
    for(i = 0; i < GET_AD; i++)
    {
@@ -98,8 +100,9 @@ void Light_TEMT6000_Get(light_type_t *light_type_get)  //函数用于获取光�
 
 void Light_value_feedback(light_type_t *light_type_back)
 {
-   light_type_back->light_value_get = (light_type_back->light_value_left_get.GET_AD_MEAN+light_type_back->light_value_right_get.GET_AD_MEAN)/2;
+   light_type_back->light_value_get = light_type_back->light_value_left_get.GET_AD_MEAN;
    light_type_back->light_value_show = (light_type_back->light_value_get*1000)/4095;
+   //printf("%d\n",light_type_back->light_value_show);
 }
 
 void Light_PID_loop(light_type_t *light_type_loop)  //函数用于进行PID运算

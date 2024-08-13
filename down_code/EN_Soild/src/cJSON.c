@@ -81,8 +81,6 @@ void esp8266_send_json(void)
         delay_ms(50);
         if(esp8266_check_cmd(&Circular_queue_send,"OK")) 
         {
-            esp8266_send_isno_2();
-            json_to_callback();
             break;//得到有效数据
         }
     }

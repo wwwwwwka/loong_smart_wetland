@@ -54,6 +54,8 @@ void Mqtt_Data_Feedback(mqtt_esp_type_t* mqtt_esp_type_back)
     {
         tempareture_process();
         Humidity_process();
+        // esp8266_send_isno();
+        // json_to_callback();
         json_to_send(&mqtt_esp_type_back->json_send_backage,&send_len);
         esp8266_send_json();
         esp_count=0;

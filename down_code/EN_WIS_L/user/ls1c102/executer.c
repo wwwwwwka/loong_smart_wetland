@@ -52,7 +52,7 @@ void run_function_50ms(void)
 
 void run_function_100ms(void)
 {
-     light_process();
+    light_process();
     ventilate_light_process();
     mqtt_process();
     led_show();
